@@ -1,0 +1,174 @@
+﻿@page "/"
+@rendermode InteractiveServer
+@using System.Timers
+@using b3digitas.Application.DTOs
+@using b3digitas.Application.Interfaces
+@using b3digitas.Application.Services
+@inject IOrderService _orderService
+
+<PageTitle>Cotação do Dia</PageTitle>
+
+<h1>Bitcoin (BTC) e Etherium (ETH)</h1>
+
+<h4>Atualizado em @dataHora</h4>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">BTC (Bid)</th>
+            <th scope="col">BTC (Ask)</th>
+            <th scope="col">ETH (Bid)</th>
+            <th scope="col">ETH (Ask)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <th scope="row">Maior preço </th>
+            <td>@btc_bid_maiorPreco</td>
+            <td>@btc_ask_maiorPreco</td>
+            <td>@eth_bid_maiorPreco</td>
+            <td>@eth_ask_maiorPreco</td>
+        </tr>
+        <tr>
+            <th scope="row">Menor preço</th>
+            <td>@btc_bid_menorPreco</td>
+            <td>@btc_ask_menorPreco</td>
+            <td>@eth_bid_menorPreco</td>
+            <td>@eth_ask_menorPreco</td>
+        </tr>
+        <tr>
+            <th scope="row">Média de preço no momento</th>
+            <td>@btc_bid_mediaPreco</td>
+            <td>@btc_ask_mediaPreco</td>
+            <td>@eth_bid_mediaPreco</td>
+            <td>@eth_ask_mediaPreco</td>
+        </tr>
+        <tr>
+            <th scope="row">Média de preço acumulada em 5 segundos</th>
+            <td>@btc_bid_mediaPrecoAcumulada</td>
+            <td>@btc_ask_mediaPrecoAcumulada</td>
+            <td>@eth_bid_mediaPrecoAcumulada</td>
+            <td>@eth_ask_mediaPrecoAcumulada</td>
+        </tr>
+        <tr>
+            <th scope="row">Média de quantidade acumulada</th>
+            <td>@btc_bid_mediaQuantidadeAcumulada</td>
+            <td>@btc_ask_mediaQuantidadeAcumulada</td>
+            <td>@eth_bid_mediaQuantidadeAcumulada</td>
+            <td>@eth_ask_mediaQuantidadeAcumulada</td>
+        </tr>
+    </tbody>
+</table>
+
+@code {
+   
+    public static decimal btc_bid_maiorPreco;
+    public static decimal btc_ask_maiorPreco;
+    public static decimal eth_bid_maiorPreco;
+    public static decimal eth_ask_maiorPreco;
+
+    public static decimal btc_bid_menorPreco;
+    public static decimal btc_ask_menorPreco;
+    public static decimal eth_bid_menorPreco;
+    public static decimal eth_ask_menorPreco;
+
+    public static string btc_bid_mediaPreco;
+    public static string btc_ask_mediaPreco;
+    public static string eth_bid_mediaPreco;
+    public static string eth_ask_mediaPreco;
+
+    public static string btc_bid_mediaPrecoAcumulada;
+    public static string btc_ask_mediaPrecoAcumulada;
+    public static string eth_bid_mediaPrecoAcumulada;
+    public static string eth_ask_mediaPrecoAcumulada;
+
+    public static string btc_bid_mediaQuantidadeAcumulada;
+    public static string btc_ask_mediaQuantidadeAcumulada;
+    public static string eth_bid_mediaQuantidadeAcumulada;
+    public static string eth_ask_mediaQuantidadeAcumulada;
+
+    private DateTime dataHora = DateTime.Now;
+    private System.Threading.Timer _timer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        var timerCallback = new TimerCallback(UpdatePrices);
+        _timer = new System.Threading.Timer(timerCallback, null, 0, 5000);
+        
+    }
+    private void UpdatePrices(object state)
+    {
+        dataHora = DateTime.Now;
+
+        Task.Run(async () =>
+        {
+            var currentOrders = await _orderService.GetBetweenDatesAsync(dataHora.AddMinutes(-1), dataHora);
+
+            var recentOrders = await _orderService.GetBetweenDatesAsync(dataHora.AddSeconds(-1), dataHora);
+            var allOrders = await _orderService.GetAllAsync();
+
+            UpdateMaxPrices(currentOrders);
+            UpdateMinPrices(currentOrders);
+            UpdateAveragePrices(currentOrders);
+            UpdateAccumulatedAveragePrices(recentOrders);
+            UpdateAccumulatedAverageQuantities(allOrders);
+
+            await InvokeAsync(StateHasChanged);
+
+        });
+
+    }
+
+    private void UpdateMaxPrices(IEnumerable<OrderDTO> orders)
+    {
+        btc_bid_maiorPreco = orders.Max(x => x.Price) != null ? Decimal.Parse(orders.Max(x => x.Price)) : 0;
+        btc_ask_maiorPreco = orders.Max(x => x.Price) != null ? Decimal.Parse(orders.Max(x => x.Price)) : 0;
+        eth_bid_maiorPreco = orders.Max(x => x.Price) != null ? Decimal.Parse(orders.Max(x => x.Price)) : 0;
+        eth_ask_maiorPreco = orders.Max(x => x.Price) != null ? Decimal.Parse(orders.Max(x => x.Price)) : 0;
+    }
+
+    private void UpdateMinPrices(IEnumerable<OrderDTO> orders)
+    {
+        btc_bid_menorPreco = orders.Min(x => x.Price) != null ? Decimal.Parse(orders.Min(x => x.Price)) : 0;
+        btc_ask_menorPreco = orders.Min(x => x.Price) != null ? Decimal.Parse(orders.Min(x => x.Price)) : 0;
+        eth_bid_menorPreco = orders.Min(x => x.Price) != null ? Decimal.Parse(orders.Min(x => x.Price)) : 0;
+        eth_ask_menorPreco = orders.Min(x => x.Price) != null ? Decimal.Parse(orders.Min(x => x.Price)) : 0;
+    }
+
+    private void UpdateAveragePrices(IEnumerable<OrderDTO> orders)
+    {
+        btc_bid_mediaPreco = CalculateAveragePrice(orders, "BTC", "B");
+        btc_ask_mediaPreco = CalculateAveragePrice(orders, "BTC", "A");
+        eth_bid_mediaPreco = CalculateAveragePrice(orders, "ETH", "B");
+        eth_ask_mediaPreco = CalculateAveragePrice(orders, "ETH", "A");
+    }
+
+    private void UpdateAccumulatedAveragePrices(IEnumerable<OrderDTO> orders)
+    {
+        btc_bid_mediaPrecoAcumulada = CalculateAveragePrice(orders, "BTC", "B");
+        btc_ask_mediaPrecoAcumulada = CalculateAveragePrice(orders, "BTC", "A");
+        eth_bid_mediaPrecoAcumulada = CalculateAveragePrice(orders, "ETH", "B");
+        eth_ask_mediaPrecoAcumulada = CalculateAveragePrice(orders, "ETH", "A");
+    }
+
+    private void UpdateAccumulatedAverageQuantities(IEnumerable<OrderDTO> orders)
+    {
+        btc_bid_mediaQuantidadeAcumulada = CalculateAverageQuantity(orders, "BTC", "B");
+        btc_ask_mediaQuantidadeAcumulada = CalculateAverageQuantity(orders, "BTC", "A");
+        eth_bid_mediaQuantidadeAcumulada = CalculateAverageQuantity(orders, "ETH", "B");
+        eth_ask_mediaQuantidadeAcumulada = CalculateAverageQuantity(orders, "ETH", "A");
+    }
+
+    private string CalculateAveragePrice(IEnumerable<OrderDTO> orders, string symbol, string type)
+    {
+        return orders.Where(x => x.Symbol == symbol && x.Type == type).Average(x => decimal.Parse(x.Price)).ToString();
+    }
+
+    private string CalculateAverageQuantity(IEnumerable<OrderDTO> orders, string symbol, string type)
+    {
+        return orders.Where(x => x.Symbol == symbol && x.Type == type).Average(x => decimal.Parse(x.Quantity)).ToString();
+    }
+    
+}

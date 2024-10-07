@@ -1,0 +1,6 @@
+@b3digitas.API_HostAddress = http://localhost:5272
+
+GET {{b3digitas.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
