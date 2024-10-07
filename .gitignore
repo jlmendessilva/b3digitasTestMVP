@@ -361,3 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/b3digitas.Auxiliar.Delete/b3digitas.Auxiliar.Delete.csproj
+/b3digitas.WSClient/b3digitas.WS.BTC.csproj
+/b3digitas.WS.ETH/b3digitas.WS.ETH.csproj
