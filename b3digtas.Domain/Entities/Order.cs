@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -29,18 +30,19 @@ namespace b3digitas.Domain.Entities
         {
                 
         }
-        public Order(string quantity, string price, string type, string symbol, string money ) 
-        {
+        public Order(string quantity, string price, string type, string symbol, string money )
+        { 
+        
+            DomainExceptionValidation.When(string.IsNullOrEmpty(price), "Price not null");
+            Type = price;
 
-            DomainExceptionValidation.When(string.IsNullOrEmpty(type), "Type cannot be empty or null");
+            DomainExceptionValidation.When(string.IsNullOrEmpty(type) || !(type == "B" || type == "A"), "Type must be B (BID - sale) or A (ASK - purchase)");
             Type = type;
 
             DomainExceptionValidation.When(string.IsNullOrEmpty(money), "Money cannot be empty or null");
-            DomainExceptionValidation.When(money.Length != 3, "Money must be equal to 3 characters");
             Money = money;
 
-            DomainExceptionValidation.When(string.IsNullOrEmpty(symbol), "Symbol cannot be empty or null");
-            DomainExceptionValidation.When(symbol.Length != 3, "Symbol must be equal to 3 characters");
+            DomainExceptionValidation.When(string.IsNullOrEmpty(symbol) || !(symbol == "BTC" || symbol == "ETH"), "must be BTC or ETH");
             Symbol = symbol;
 
             

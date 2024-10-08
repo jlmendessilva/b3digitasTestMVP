@@ -30,11 +30,11 @@ namespace b3digitas.Domain.Entities
             Id = Guid.NewGuid();
             UsedOrders = new List<Order>();
 
-            DomainExceptionValidation.When(string.IsNullOrEmpty(operation), "Operation cannot be empty or null");
-            DomainExceptionValidation.When(!(operation == "A" || operation == "B"), "Operation receives only one letter A (Ask) or B (Bid)");
+
+            DomainExceptionValidation.When(string.IsNullOrEmpty(operation) || !(operation == "B" || operation == "A"), "Operation receives only one letter A (Ask) or B (Bid)");
             Operation = operation;
 
-            DomainExceptionValidation.When(string.IsNullOrEmpty(coin), "Coin cannot be empty or null");
+            DomainExceptionValidation.When(string.IsNullOrEmpty(coin) || !(coin == "BTC" || coin == "ETH"), "Coin must be BTC or ETH");
             DomainExceptionValidation.When(!(coin == "BTC" || coin == "ETH"), "BTC or ETH");
             Coin = coin;
 
