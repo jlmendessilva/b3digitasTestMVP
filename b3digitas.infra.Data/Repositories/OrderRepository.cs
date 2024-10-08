@@ -23,7 +23,7 @@ namespace b3digitas.Infra.Data.Repositories
         {
             ValidateDates(startDate, endDate);
 
-            var query = new QueryDefinition("SELECT o.Quantity, o.Price, o.Symbol, o.Type FROM Orders o WHERE o.CreatedDate >= @startDate AND o.CreatedDate <= @endDate")
+            var query = new QueryDefinition("SELECT o.id, o.Quantity, o.Price, o.Symbol, o.Type FROM Orders o WHERE o.CreatedDate >= @startDate AND o.CreatedDate <= @endDate")
                         .WithParameter("@startDate", startDate.ToString("yyyy-MM-ddTHH:mm:ss"))
                         .WithParameter("@endDate", endDate.ToString("yyyy-MM-ddTHH:mm:ss"));
 
@@ -34,7 +34,7 @@ namespace b3digitas.Infra.Data.Repositories
         {
             ValidateParameters(coin, operation);
 
-            var query = new QueryDefinition("SELECT o.Quantity, o.Price, o.Type, o.Symbol FROM Orders o WHERE o.Type = @type AND o.Symbol = @symbol")
+            var query = new QueryDefinition("SELECT o.id, o.Quantity, o.Price, o.Type, o.Symbol, o.CreatedDate FROM Orders o WHERE o.Type = @type AND o.Symbol = @symbol")
                         .WithParameter("@type", operation)
                         .WithParameter("@symbol", coin);
 

@@ -15,7 +15,8 @@ namespace b3digitas.Application.DTOs
         public string Operation { get; set; }
         public string Coin { get; set; }
         public string Quantity { get; set; }
+        public string QuantityAvailable { get; set; }
         public decimal TotalValue { get; set; }
-        public List<Order> UsedOrders { get; set; }
+        public List<QuoteOrdesDTO> UsedOrders { get; set; }
     }
 }

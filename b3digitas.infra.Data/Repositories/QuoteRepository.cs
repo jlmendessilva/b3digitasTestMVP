@@ -1,13 +1,7 @@
 ﻿using b3digitas.Domain.Entities;
 using b3digitas.Domain.Interfaces;
 using b3digitas.Infra.Data.Context;
-using Npgsql.EntityFrameworkCore.PostgreSQL;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.Metrics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace b3digitas.Infra.Data.Repositories
 {
@@ -32,13 +26,15 @@ namespace b3digitas.Infra.Data.Repositories
             var orders = await _orderRepository.GetLatestOrdersAsync(coin, operation);
 
             //reorganiza as orders
-            var relevantOrders = operation.ToLower() == "A"
+            var relevantOrders = operation.ToUpper() == "A"
             ? orders.Where(o => o.Symbol == coin && o.Type == "A").OrderBy(o => o.Price).ToList()
             : orders.Where(o => o.Symbol == coin && o.Type == "B").OrderByDescending(o => o.Price).ToList();
 
             quote.SetTotalValue(CalculatePrice(relevantOrders, Decimal.Parse(quantity), out var usedOrders));
 
-            //quote.UsedOrders = usedOrders;
+            quote.SetOrders(usedOrders);
+            quote.SetQuantityAvailable(quote.UsedOrders.Sum(x => Decimal.Parse(x.Quantity, System.Globalization.CultureInfo.InvariantCulture)).ToString());
+
 
             // Gravar a cotação no banco de dados
             await SaveQuoteAsync(quote);
@@ -52,32 +48,30 @@ namespace b3digitas.Infra.Data.Repositories
             await _db.SaveChangesAsync();
         }
 
-        private decimal CalculatePrice(IEnumerable<Order> orders, decimal quantity, out List<Order> usedOrders)
+        private decimal CalculatePrice(IEnumerable<Order> orders, decimal quantity, out List<QuoteOrdes> usedOrders)
         {
             if(orders.Count() == 0 || orders == null)
-                throw new InvalidOperationException("Não há ordens suficientes para atender à quantidade solicitada.");
+                throw new InvalidOperationException("Existe lista de ordens para cotação");
 
-            usedOrders = new List<Order>();
+            usedOrders = new List<QuoteOrdes>();
             decimal accumulatedQuantity = 0;
             decimal totalPrice = 0;
 
             foreach (var order in orders)
             {
-                decimal orderQuantity = Math.Min(Decimal.Parse(order?.Quantity), quantity - accumulatedQuantity);
-                totalPrice += orderQuantity * Decimal.Parse(order?.Price);
-                accumulatedQuantity += orderQuantity;
-                usedOrders.Add(order);
+                decimal orderQuantity = Decimal.Parse(order.Quantity, System.Globalization.CultureInfo.InvariantCulture);
+                decimal remainingQuantity = quantity - accumulatedQuantity;
 
-                if (accumulatedQuantity >= quantity)
+                if (orderQuantity <= remainingQuantity)
                 {
-                    break;
+                    totalPrice += Decimal.Parse(order?.Price);
+                    accumulatedQuantity += orderQuantity;
+
+                    usedOrders.Add(new QuoteOrdes { Order = order.Id, Price = order.Price, Quantity = order.Quantity });
                 }
+                
             }
 
-            if (accumulatedQuantity < quantity)
-            {
-                throw new InvalidOperationException("Não há ordens suficientes para atender à quantidade solicitada.");
-            }
 
             return totalPrice;
         }

@@ -12,8 +12,8 @@ using b3digitas.Infra.Data.Context;
 namespace b3digitas.Infra.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241007194408_Tabela_Quote")]
-    partial class Tabela_Quote
+    [Migration("20241008135526_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -43,9 +43,6 @@ namespace b3digitas.Infra.Data.Migrations
                     b.Property<string>("Quantity")
                         .HasColumnType("text");
 
-                    b.Property<Guid?>("QuoteId")
-                        .HasColumnType("uuid");
-
                     b.Property<string>("Symbol")
                         .HasColumnType("text");
 
@@ -53,8 +50,6 @@ namespace b3digitas.Infra.Data.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("QuoteId");
 
                     b.ToTable("Orders");
                 });
@@ -91,11 +86,45 @@ namespace b3digitas.Infra.Data.Migrations
                     b.ToTable("Quote");
                 });
 
-            modelBuilder.Entity("b3digitas.Domain.Entities.Order", b =>
+            modelBuilder.Entity("b3digitas.Domain.Entities.QuoteOrdes", b =>
                 {
-                    b.HasOne("b3digitas.Domain.Entities.Quote", null)
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("DateCreated")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("Order")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Price")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Quantity")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("QuoteId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuoteId");
+
+                    b.ToTable("QuoteOrdes");
+                });
+
+            modelBuilder.Entity("b3digitas.Domain.Entities.QuoteOrdes", b =>
+                {
+                    b.HasOne("b3digitas.Domain.Entities.Quote", "Quote")
                         .WithMany("UsedOrders")
-                        .HasForeignKey("QuoteId");
+                        .HasForeignKey("QuoteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Quote");
                 });
 
             modelBuilder.Entity("b3digitas.Domain.Entities.Quote", b =>

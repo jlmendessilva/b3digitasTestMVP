@@ -10,26 +10,21 @@ namespace b3digitas.Domain.Entities
 {
     public sealed class Quote : Entity
     {
-        [JsonProperty(PropertyName = "operation")]
         public string Operation { get; private set; }
 
-        [JsonProperty(PropertyName = "coin")]
         public string Coin { get; private set; }
 
-        [JsonProperty(PropertyName = "quantity")]
         public string Quantity { get; private set; }
 
-        [JsonProperty(PropertyName = "totalvalue")]
+        public string QuantityAvailable { get; private set; }
+
         public decimal TotalValue { get; private set; }
 
-        [JsonProperty(PropertyName = "usedOrder")]
-        public List<Order> UsedOrders { get; private set; }
+        public List<QuoteOrdes> UsedOrders { get; private set; } = new List<QuoteOrdes>();
 
         public Quote(string operation, string coin, string quantity)
         {
             Id = Guid.NewGuid();
-            UsedOrders = new List<Order>();
-
 
             DomainExceptionValidation.When(string.IsNullOrEmpty(operation) || !(operation == "B" || operation == "A"), "Operation receives only one letter A (Ask) or B (Bid)");
             Operation = operation;
@@ -45,6 +40,10 @@ namespace b3digitas.Domain.Entities
         }
 
         public void SetTotalValue(decimal value) => TotalValue = value;
+
+        public void SetOrders(List<QuoteOrdes> orders) => UsedOrders = orders;
+
+        public void SetQuantityAvailable(string value) => QuantityAvailable = value;
 
     }
 }

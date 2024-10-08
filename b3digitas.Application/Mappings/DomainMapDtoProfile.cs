@@ -13,6 +13,7 @@ namespace b3digitas.Application.Mappings
         {
            CreateMap<Order, OrderDTO>().ReverseMap();
            CreateMap<Quote, QuoteDTO>().ReverseMap();
+           CreateMap<QuoteOrdes, QuoteOrdesDTO>().ReverseMap();
         }
     }
 }

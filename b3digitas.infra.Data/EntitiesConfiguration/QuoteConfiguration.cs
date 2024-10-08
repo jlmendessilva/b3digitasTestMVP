@@ -17,6 +17,7 @@ namespace b3digitas.Infra.Data.EntitiesConfiguration
             builder.Property(p => p.Operation).HasMaxLength(1).IsRequired();
             builder.Property(p => p.Coin).HasMaxLength(3).IsRequired();
             builder.Property(p => p.Quantity).HasMaxLength(30).IsRequired();
+            builder.Property(p => p.QuantityAvailable).HasMaxLength(30);
             builder.Property(p => p.TotalValue).IsRequired();
             builder.Property(p => p.DateCreated).HasColumnType("timestamp without time zone");
 

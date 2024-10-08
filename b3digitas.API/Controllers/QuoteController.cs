@@ -17,8 +17,7 @@ namespace b3digitas.API.Controllers
         }
 
         [HttpGet]
-        public async Task<QuoteDTO> GetQuote([FromQuery(Name = "B - Venda ou A - Compra")] string operation,
-                                            [FromQuery(Name = "BTC ou ETH")] string coin, string quantity)
+        public async Task<QuoteDTO> GetQuote(string operation, string coin, string quantity)
         {
             return await _quote.GetBestPriceQuoteAsync(operation, coin, quantity);
         }
