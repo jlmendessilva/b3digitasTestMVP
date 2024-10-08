@@ -30,7 +30,7 @@ namespace b3digitas.Infra.Data.Repositories
             ? orders.Where(o => o.Symbol == coin && o.Type == "A").OrderBy(o => o.Price).ToList()
             : orders.Where(o => o.Symbol == coin && o.Type == "B").OrderByDescending(o => o.Price).ToList();
 
-            quote.SetTotalValue(CalculatePrice(relevantOrders, Decimal.Parse(quantity), out var usedOrders));
+            quote.SetTotalValue(CalculatePrice(relevantOrders, Decimal.Parse(quantity, System.Globalization.CultureInfo.InvariantCulture), out var usedOrders));
 
             quote.SetOrders(usedOrders);
             quote.SetQuantityAvailable(quote.UsedOrders.Sum(x => Decimal.Parse(x.Quantity, System.Globalization.CultureInfo.InvariantCulture)).ToString());
@@ -64,7 +64,7 @@ namespace b3digitas.Infra.Data.Repositories
 
                 if (orderQuantity <= remainingQuantity)
                 {
-                    totalPrice += Decimal.Parse(order?.Price);
+                    totalPrice += orderQuantity * Decimal.Parse(order?.Price);
                     accumulatedQuantity += orderQuantity;
 
                     usedOrders.Add(new QuoteOrdes { Order = order.Id, Price = order.Price, Quantity = order.Quantity });

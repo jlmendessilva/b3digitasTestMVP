@@ -6,11 +6,28 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace b3digitas.Infra.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class database_initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "Orders",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Quantity = table.Column<string>(type: "text", nullable: true),
+                    Price = table.Column<string>(type: "text", nullable: true),
+                    Type = table.Column<string>(type: "text", nullable: true),
+                    Symbol = table.Column<string>(type: "text", nullable: true),
+                    Money = table.Column<string>(type: "text", nullable: true),
+                    DateCreated = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Orders", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Quote",
                 columns: table => new
@@ -19,6 +36,7 @@ namespace b3digitas.Infra.Data.Migrations
                     Operation = table.Column<string>(type: "character varying(1)", maxLength: 1, nullable: false),
                     Coin = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
                     Quantity = table.Column<string>(type: "character varying(30)", maxLength: 30, nullable: false),
+                    QuantityAvailable = table.Column<string>(type: "character varying(30)", maxLength: 30, nullable: false),
                     TotalValue = table.Column<decimal>(type: "numeric", nullable: false),
                     DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: true)
                 },
