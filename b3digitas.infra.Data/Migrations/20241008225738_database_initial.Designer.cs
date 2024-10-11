@@ -12,8 +12,8 @@ using b3digitas.Infra.Data.Context;
 namespace b3digitas.Infra.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241008135526_Initial")]
-    partial class Initial
+    [Migration("20241008225738_database_initial")]
+    partial class database_initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -74,6 +74,11 @@ namespace b3digitas.Infra.Data.Migrations
                         .HasColumnType("character varying(1)");
 
                     b.Property<string>("Quantity")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<string>("QuantityAvailable")
                         .IsRequired()
                         .HasMaxLength(30)
                         .HasColumnType("character varying(30)");
