@@ -104,16 +104,16 @@
 
         Task.Run(async () =>
         {
-            var currentOrders = await _orderService.GetBetweenDatesAsync(dataHora.AddMinutes(-1), dataHora);
-
-            var recentOrders = await _orderService.GetBetweenDatesAsync(dataHora.AddSeconds(-1), dataHora);
             var allOrders = await _orderService.GetAllAsync();
+            var currentOrders = await _orderService.GetBetweenDatesAsync(dataHora, dataHora);
+            var recentOrders = await _orderService.GetBetweenDatesAsync(dataHora.AddSeconds(-5), dataHora);
+            
 
-            UpdateMaxPrices(currentOrders);
-            UpdateMinPrices(currentOrders);
-            UpdateAveragePrices(currentOrders);
-            UpdateAccumulatedAveragePrices(recentOrders);
-            UpdateAccumulatedAverageQuantities(allOrders);
+            UpdateMaxPrices(currentOrders);//Maior preço no momento
+            UpdateMinPrices(currentOrders);//Menor preço do momento
+            UpdateAveragePrices(currentOrders);//Media de preço no momento
+            UpdateAccumulatedAveragePrices(recentOrders);//Media de preço acumulada nos 5 segundos
+            UpdateAccumulatedAverageQuantities(allOrders);//Acumulado de quantidades
 
             await InvokeAsync(StateHasChanged);
 
@@ -123,18 +123,18 @@
 
     private void UpdateMaxPrices(IEnumerable<OrderDTO> orders)
     {
-        btc_bid_maiorPreco = orders.Max(x => x.Price) != null ? Decimal.Parse(orders.Max(x => x.Price)) : 0;
-        btc_ask_maiorPreco = orders.Max(x => x.Price) != null ? Decimal.Parse(orders.Max(x => x.Price)) : 0;
-        eth_bid_maiorPreco = orders.Max(x => x.Price) != null ? Decimal.Parse(orders.Max(x => x.Price)) : 0;
-        eth_ask_maiorPreco = orders.Max(x => x.Price) != null ? Decimal.Parse(orders.Max(x => x.Price)) : 0;
+        btc_bid_maiorPreco = Decimal.Parse(CalculateMaxPrice(orders, "BTC", "B").ToString("N2"));
+        btc_ask_maiorPreco = Decimal.Parse(CalculateMaxPrice(orders, "BTC", "A").ToString("N2"));
+        eth_bid_maiorPreco = Decimal.Parse(CalculateMaxPrice(orders, "ETH", "B").ToString("N2"));
+        eth_ask_maiorPreco = Decimal.Parse(CalculateMaxPrice(orders, "ETH", "A").ToString("N2"));
     }
 
     private void UpdateMinPrices(IEnumerable<OrderDTO> orders)
     {
-        btc_bid_menorPreco = orders.Min(x => x.Price) != null ? Decimal.Parse(orders.Min(x => x.Price)) : 0;
-        btc_ask_menorPreco = orders.Min(x => x.Price) != null ? Decimal.Parse(orders.Min(x => x.Price)) : 0;
-        eth_bid_menorPreco = orders.Min(x => x.Price) != null ? Decimal.Parse(orders.Min(x => x.Price)) : 0;
-        eth_ask_menorPreco = orders.Min(x => x.Price) != null ? Decimal.Parse(orders.Min(x => x.Price)) : 0;
+        btc_bid_menorPreco = Decimal.Parse(CalculateMinPrice(orders, "BTC", "B").ToString("N2"));
+        btc_ask_menorPreco = Decimal.Parse(CalculateMinPrice(orders, "BTC", "A").ToString("N2"));
+        eth_bid_menorPreco = Decimal.Parse(CalculateMinPrice(orders, "ETH", "B").ToString("N2"));
+        eth_ask_menorPreco = Decimal.Parse(CalculateMinPrice(orders, "ETH", "A").ToString("N2"));
     }
 
     private void UpdateAveragePrices(IEnumerable<OrderDTO> orders)
@@ -163,12 +163,22 @@
 
     private string CalculateAveragePrice(IEnumerable<OrderDTO> orders, string symbol, string type)
     {
-        return orders.Where(x => x.Symbol == symbol && x.Type == type).Average(x => decimal.Parse(x.Price)).ToString();
+        return orders.Where(x => x.Symbol == symbol && x.Type == type).Average(x => decimal.Parse(x.Price)).ToString("N2");
     }
 
     private string CalculateAverageQuantity(IEnumerable<OrderDTO> orders, string symbol, string type)
     {
-        return orders.Where(x => x.Symbol == symbol && x.Type == type).Average(x => decimal.Parse(x.Quantity)).ToString();
+        return orders.Where(x => x.Symbol == symbol && x.Type == type).Average(x => decimal.Parse(x.Quantity)).ToString("N2");
+    }
+
+    private decimal CalculateMaxPrice(IEnumerable<OrderDTO> orders, string symbol, string type)
+    {
+        return orders.Where(x => x.Symbol == symbol && x.Type == type).Max(x => decimal.Parse(x.Price));
+    }
+
+    private decimal CalculateMinPrice(IEnumerable<OrderDTO> orders, string symbol, string type)
+    {
+        return orders.Where(x => x.Symbol == symbol && x.Type == type).Min(x => decimal.Parse(x.Price));
     }
     
 }
